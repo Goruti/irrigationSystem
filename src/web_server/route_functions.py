@@ -531,10 +531,9 @@ async def enable_ftp(req, resp):
     _logger.info("Running 'config_ftp'")
     gc.collect()
     try:
-        import ftptiny
+        import uftp as ftp
         gc.collect()
-        ftp = ftptiny.FtpTiny()
-        await __srv_start_stop(req, resp, ftp, save_ftp_config)
+        await __srv_start_stop(req, resp, ftp, save_ftp_config, verbose=2, splash=True)
     except Exception as e:
         _logger.exc(e, "Fail to start/stop ftp")
         gc.collect()

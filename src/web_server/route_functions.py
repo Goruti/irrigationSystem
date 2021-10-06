@@ -10,7 +10,7 @@ gc.collect()
 import ujson as json
 gc.collect()
 from tools.conf import AP_SSID, AP_PWD, LOG_DIR, WEBREPL_PWD
-from tools.wifi import is_connected, wifi_disconnect, start_ap, get_available_networks,\
+from tools.wifi import is_connected, wifi_disconnect, start_ap, stop_ap, get_available_networks,\
     wifi_connect
 gc.collect()
 from tools.libraries import get_net_configuration, get_irrigation_state, get_irrigation_status,\
@@ -202,9 +202,10 @@ async def wifi_config_post(req, resp):
             html_page = wifi_js.confirmation(data)
             await __send_page_generator(resp, html_page)
 
-            await asyncio.sleep(5)
-            _logger.debug("restarting ESP-32")
-            machine.reset()
+            #await asyncio.sleep(5)
+            #_logger.debug("restarting ESP-32")
+            #machine.reset()
+            stop_ap()
 
         except Exception as e:
             _logger.exc(e, "Fail to save wifi configuration and re-start the system")

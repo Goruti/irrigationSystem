@@ -476,10 +476,10 @@ async def test_system(req, resp):
             gc.collect()
             await resp.redirect("/", "redirected to the home page")
         else:
-            data = {
+            data = [{
                 "type": "system_test",
                 "body": "done"
-            }
+            }]
             gc.collect()
             await resp.start_json()
             await resp.send(json.dumps(data))

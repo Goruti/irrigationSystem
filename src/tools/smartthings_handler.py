@@ -2,7 +2,7 @@ import gc
 import uasyncio as asyncio
 from machine import reset
 from tools.wifi import is_connected
-import urequests as requests
+import aurequests as requests
 from logging import getLogger
 
 gc.collect()
@@ -33,7 +33,7 @@ class SmartThings:
                         await asyncio.sleep(pow(2, (self.retry_num - attempts)) * self.retry_sec)
 
                     if not attempts:
-                        _logger.error("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num))
+                        _logger.error("Smartthings.notify - Tried: {} times and it couldn't send readings".format(self.retry_num+1))
                 else:
                     _logger.error("SmartThings is not configured")
             except Exception as e:
@@ -51,7 +51,7 @@ class SmartThings:
         headers = {"Content-Type": "application/json"}
 
         try:
-            r = self.requests.post(self.URL, json=body, headers=headers)
+            r = await self.requests.post(self.URL, json=body, headers=headers)
         except Exception as e:
             _logger.exc(e, "fail to send Value - free_memory: {}".format(gc.mem_free()))
         else:
@@ -59,7 +59,10 @@ class SmartThings:
                 failed = False
             else:
                 _logger.debug("'Smartthings.send_values' - HTTP_Status_Code: '{}' - HTTP_Reason: {}".format(r.get("status_code"), r.get("reason")))
-            r.close()
+            try:
+                await r.close()
+            except Exception as e:
+                _logger.exc(e, "Cannot close the connection")
         finally:
             gc.collect()
             return failed

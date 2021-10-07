@@ -26,7 +26,7 @@ from micropython import alloc_emergency_exception_buf
 from logging import getLogger
 gc.collect()
 
-_logger = getLogger("route_functions")
+_logger = getLogger("uftp")
 
 # constant definitions
 _CHUNK_SIZE = const(1024)

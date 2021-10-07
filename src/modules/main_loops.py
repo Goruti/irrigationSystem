@@ -57,13 +57,15 @@ async def reading_moister(frequency_loop_ms=300000, report_freq_ms=1800000):
                         moisture = await read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
                         #moisture_status[values["connected_to_port"]] = await moisture_to_hum(values["connected_to_port"], moisture)
                         moisture_status[values["connected_to_port"]] = moisture
-                        if values["moisture_threshold"] < moisture < 4090:
+                        if values["moisture_threshold"] < moisture < 3000:
                             await start_irrigation(
                                                     port=values["connected_to_port"],
                                                     moisture=moisture,
                                                     threshold=values["moisture_threshold"],
                                                     max_irrigation_time_ms=4000
                                             )
+                        else:
+                            _logger.error("Sensor seems to not be working properly")
 
                     if st and ticks_diff(ticks_ms(), report_time) > 0:
                         report_time = ticks_add(ticks_ms(), report_freq_ms)

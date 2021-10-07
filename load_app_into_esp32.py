@@ -98,10 +98,10 @@ def loaded_files(directory="/", long_format=True, recursive=True):
 def main():
     print("####### GENERATING BYTECODES ##########")
     build_bytecode(APP_ROOT_DIR)
-    print("####### LOADING FILES... ##########")
-    load_files(APP_ROOT_DIR)
-    print("#######LOADED FILES ##########")
-    loaded_files()
+    #print("####### LOADING FILES... ##########")
+    #load_files(APP_ROOT_DIR)
+    #print("#######LOADED FILES ##########")
+    #loaded_files()
 
 
 if __name__ == "__main__":

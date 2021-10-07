@@ -6,10 +6,9 @@
 # Start the server with:
 #
 # import uftpd
-# uftpd.start([port = 21][, verbose = level])
+# uftpd.start([port = 21][, ])
 #
 # port is the port number (default 21)
-# verbose controls the level of printed activity messages, values 0, 1, 2
 #
 # Copyright (c) 2016 Christopher Popp (initial ftp server framework)
 # Copyright (c) 2016 Paul Sokolovsky (background execution control structure)
@@ -39,7 +38,6 @@ _DATA_PORT = const(13333)
 ftpsocket = None
 datasocket = None
 client_list = []
-verbose_l = 0
 client_busy = False
 # Interfaces: (IP-Address (string), IP-Address (integer), Netmask (integer))
 AP_addr = ("0.0.0.0", 0, 0xffffff00)
@@ -56,7 +54,7 @@ class FTP_client:
         self.command_client, self.remote_addr = ftpsocket.accept()
         self.remote_addr = self.remote_addr[0]
         self.command_client.settimeout(_COMMAND_TIMEOUT)
-        log_msg(1, "FTP Command connection from:", self.remote_addr)
+        _logger.info("FTP Command connection from: {}".format(self.remote_addr))
         self.command_client.setsockopt(socket.SOL_SOCKET,
                                        _SO_REGISTER_HANDLER,
                                        self.exec_ftp_command)
@@ -182,10 +180,10 @@ class FTP_client:
             data_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             data_client.settimeout(_DATA_TIMEOUT)
             data_client.connect((self.act_data_addr, self.DATA_PORT))
-            log_msg(1, "FTP Data connection with:", self.act_data_addr)
+            _logger.info("FTP Data connection with:".format(self.act_data_addr))
         else:  # passive mode
             data_client, data_addr = datasocket.accept()
-            log_msg(1, "FTP Data connection with:", data_addr[0])
+            _logger.info("FTP Data connection with:".format(data_addr[0]))
         return data_client
 
     def exec_ftp_command(self, cl):
@@ -203,7 +201,7 @@ class FTP_client:
                 # This part is NOT CLEAN; there is still a chance that a
                 # closing data connection will be signalled as closing
                 # command connection
-                log_msg(1, "*** No data, assume QUIT")
+                _logger.info(1, "*** No data, assume QUIT")
                 close_client(cl)
                 return
 
@@ -221,7 +219,7 @@ class FTP_client:
             command = data.split()[0].upper()
             payload = data[len(command):].lstrip()  # partition is missing
             path = self.get_absolute_path(self.cwd, payload)
-            log_msg(1, "Command={}, Payload={}".format(command, payload))
+            _logger.info("Command={}, Payload={}".format(command, payload))
 
             if command == "USER":
                 # self.logged_in = True
@@ -381,16 +379,10 @@ class FTP_client:
                 #  "Unsupported command {} with payload {}".format(command,
                 #  payload))
         # handle unexpected errors
-        except Exception as err:
-            log_msg(1, "Exception in exec_ftp_command: {}".format(err))
+        except Exception as e:
+            _logger.exc(e, "Exception in exec_ftp_command")
         # tidy up before leaving
         client_busy = False
-
-
-def log_msg(level, *args):
-    global verbose_l
-    if verbose_l >= level:
-        _logger.info(*args)
 
 
 # close client and remove it from the list
@@ -407,8 +399,8 @@ def accept_ftp_connect(ftpsocket):
     # Accept new calls for the server
     try:
         client_list.append(FTP_client(ftpsocket))
-    except:
-        log_msg(1, "Attempt to connect failed")
+    except Exception as e:
+        _logger.exc(e, "Attempt to connect failed. Error: {}")
         # try at least to reject
         try:
             temp_client, temp_addr = ftpsocket.accept()
@@ -442,15 +434,13 @@ def stop():
 
 
 # start listening for ftp connections on port 21
-def start(port=21, verbose=0, splash=True):
+def start(port=21):
     global ftpsocket, datasocket
-    global verbose_l
     global client_list
     global client_busy
     global AP_addr, STA_addr
 
     alloc_emergency_exception_buf(100)
-    verbose_l = verbose
     client_list = []
     client_busy = False
 
@@ -474,21 +464,16 @@ def start(port=21, verbose=0, splash=True):
         ifconfig = wlan.ifconfig()
         # save IP address string and numerical values of IP adress and netmask
         AP_addr = (ifconfig[0], num_ip(ifconfig[0]), num_ip(ifconfig[1]))
-        if splash:
-            _logger.info("FTP server started on {}:{}".format(ifconfig[0], port))
+        _logger.info("FTP server started on {}:{}".format(ifconfig[0], port))
     wlan = network.WLAN(network.STA_IF)
     if wlan.active():
         ifconfig = wlan.ifconfig()
         # save IP address string and numerical values of IP adress and netmask
         STA_addr = (ifconfig[0], num_ip(ifconfig[0]), num_ip(ifconfig[1]))
-        if splash:
-            _logger.info("FTP server started on {}:{}".format(ifconfig[0], port))
+        _logger.info("FTP server started on {}:{}".format(ifconfig[0], port))
 
 
-def restart(port=21, verbose=0, splash=True):
+def restart(port=21):
     stop()
     sleep_ms(200)
-    start(port, verbose, splash)
-
-
-#start(splash=True)
+    start(port)

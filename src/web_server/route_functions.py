@@ -533,7 +533,7 @@ async def enable_ftp(req, resp):
     try:
         import uftp as ftp
         gc.collect()
-        await __srv_start_stop(req, resp, ftp, save_ftp_config, verbose=2, splash=True)
+        await __srv_start_stop(req, resp, ftp, save_ftp_config)
     except Exception as e:
         _logger.exc(e, "Fail to start/stop ftp")
         gc.collect()

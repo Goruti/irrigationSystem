@@ -405,6 +405,9 @@ def initialize_root_logger(level, logfile=None):
         if logfile:
             rfh = RotatingFileHandler(logfile, maxBytes=20*1024, backupCount=5)
             _logger.addHandler(rfh)
+        else:
+            rfh = RotatingFileHandler(logfile, maxBytes=10 * 1024, backupCount=2)
+            _logger.addHandler(rfh)
 
     except Exception as e:
         buf = uio.StringIO()

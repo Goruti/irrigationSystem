@@ -18,7 +18,7 @@ SD_MOUNTING = "sd"
 DB_DIR = "/db"
 DB_FILENAME = "irrigation.db"
 #Logs
-LOG_DIR = "{}/logs".format(SD_MOUNTING) if SD_MOUNTING and str(SD_MOUNTING) != "" else None
+LOG_DIR = "logs"
 LOG_FILENAME = "irrigation.log"
 
 

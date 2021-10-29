@@ -46,7 +46,7 @@ async def moisture_to_hum(port, moisture):
             hum = 100.0
         else:
             hum = 100*((moisture-dry)/(wet-dry))
-    except Exception as e:
+    except:
         hum = -1.0
     finally:
         gc.collect()
@@ -61,8 +61,8 @@ async def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=200
     if started:
         t = utime.ticks_ms()
         while moisture > threshold * 0.9 and abs(utime.ticks_diff(utime.ticks_ms(), t)) < max_irrigation_time_ms:
-            moisture = read_adc(sensor_pin)
-            utime.sleep_ms(100)
+            moisture = await read_adc(sensor_pin)
+            asyncio.sleep_ms(100)
 
         await stop_pump(port=port, notify=False)
 
@@ -73,7 +73,6 @@ async def start_irrigation(port, moisture, threshold, max_irrigation_time_ms=200
             "body": {port: moisture_to_hum(port, moisture)}
         }
         await st.notify(payload)
-
 
 
 async def read_gpio(pin):
@@ -428,7 +427,7 @@ def mount_sd_card():
     sd_mounted = False
     if SD_MOUNTING and str(SD_MOUNTING) != "":
         try:
-            sd = machine.SDCard(slot=2, freq=80000000)
+            sd = machine.SDCard(slot=2, sck=18, miso=19, mosi=23, cs=5, freq=80000000)
         except Exception as e:
             buf = uio.StringIO()
             sys.print_exception(e, buf)

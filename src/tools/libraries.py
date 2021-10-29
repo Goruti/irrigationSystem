@@ -5,6 +5,7 @@ gc.collect()
 import sys
 import uos
 import uio
+import utime
 from logging import getLogger, basicConfig
 gc.collect()
 from logging.handlers import RotatingFileHandler
@@ -27,8 +28,8 @@ async def get_irrigation_status():
                 PORT_PIN_MAPPING.get(values["connected_to_port"], {}).get("pin_pump")) else "off"
             moisture = await read_adc(PORT_PIN_MAPPING.get(values["connected_to_port"]).get("pin_sensor"))
             systems_info["pump_info"][key]["moisture"] = moisture
-            systems_info["pump_info"][key]["humidity"] = await moisture_to_hum(values["connected_to_port"], moisture)
-            systems_info["pump_info"][key]["threshold_pct"] = await moisture_to_hum(values["connected_to_port"], values["moisture_threshold"])
+            #systems_info["pump_info"][key]["humidity"] = await moisture_to_hum(values["connected_to_port"], moisture)
+            #systems_info["pump_info"][key]["threshold_pct"] = await moisture_to_hum(values["connected_to_port"], values["moisture_threshold"])
 
     systems_info["water_level"] = await get_watter_level()
     gc.collect()
